@@ -20,6 +20,12 @@ void UOpenDoor::BeginPlay()
 	Super::BeginPlay();
 	CurrentYaw = GetOwner()->GetActorRotation().Yaw;
 	TargetYaw = CurrentYaw + OffsetYaw;
+
+	if (!PressurePlate)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s has the OpenDoor component on it, but no PressurePlate set."), *GetOwner()->GetName());
+	}
+	ActorThatCanOpenDoor = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
 
 
@@ -28,8 +34,16 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (PressurePlate && PressurePlate->IsOverlappingActor(ActorThatCanOpenDoor))
+	{
+		OpenDoor(DeltaTime);
+	}
+}
+
+void UOpenDoor::OpenDoor(float DeltaTime)
+{
 	FRotator OpenDoor = GetOwner()->GetActorRotation();
-	CurrentYaw = FMath::Lerp(CurrentYaw, TargetYaw, LerpAlpha);
+	CurrentYaw = FMath::Lerp(CurrentYaw, TargetYaw, LerpAlpha * DeltaTime);
 
 	if (CurrentYaw != OpenDoor.Yaw)
 	{

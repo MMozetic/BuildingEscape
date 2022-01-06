@@ -33,13 +33,12 @@ public:
 	float RotationCloseSpeed = 1.0;
 
 	UPROPERTY(EditAnywhere)
-	float OffsetYaw = 90.f;
+	float OpenAngle = 90.f;
 
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume* PressurePlate;
 
 	AActor* ActorThatCanOpenDoor;
-
 	float DoorLastOpened = 0.0;
 
 	UPROPERTY(EditAnywhere)

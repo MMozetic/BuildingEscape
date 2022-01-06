@@ -19,7 +19,7 @@ void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
 	CurrentYaw = GetOwner()->GetActorRotation().Yaw;
-	TargetYaw = CurrentYaw + OffsetYaw;
+	TargetYaw = CurrentYaw + OpenAngle;
 
 	if (!PressurePlate)
 	{
@@ -45,7 +45,7 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 		// Close Door -> Rotate from Current Yaw to Initial Yaw.
 		if (GetWorld()->GetTimeSeconds() > DoorLastOpened + DoorCloseDelay)
 		{
-			RotateDoorYaw(DeltaTime, CurrentYaw, TargetYaw - OffsetYaw, RotationCloseSpeed);
+			RotateDoorYaw(DeltaTime, CurrentYaw, TargetYaw - OpenAngle, RotationCloseSpeed);
 		}
 	}
 

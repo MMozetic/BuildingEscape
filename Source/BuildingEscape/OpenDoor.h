@@ -27,7 +27,10 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin="0.0", ClampMax="1.0"))
-	float LerpAlpha = 0.1;
+	float RotationOpenSpeed = 1.0;
+
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float RotationCloseSpeed = 1.0;
 
 	UPROPERTY(EditAnywhere)
 	float OffsetYaw = 90.f;
@@ -38,8 +41,13 @@ public:
 	UPROPERTY(EditAnywhere)
 	AActor* ActorThatCanOpenDoor;
 
+	float DoorLastOpened = 0.0;
+
+	UPROPERTY(EditAnywhere)
+	float DoorCloseDelay = 2.0;
+
 private:
-	void OpenDoor(float DeltaTime);
+	void RotateDoorYaw(float DeltaTime, float &StartingYaw, float EndingYaw, float RotationSpeed);
 	float CurrentYaw;
 	float TargetYaw;
 };

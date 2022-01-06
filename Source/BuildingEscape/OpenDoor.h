@@ -38,7 +38,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume* PressurePlate;
 
-	UPROPERTY(EditAnywhere)
 	AActor* ActorThatCanOpenDoor;
 
 	float DoorLastOpened = 0.0;

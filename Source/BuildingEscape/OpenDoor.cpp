@@ -43,7 +43,6 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	else
 	{
 		// Close Door -> Rotate from Current Yaw to Initial Yaw.
-		
 		if (GetWorld()->GetTimeSeconds() > DoorLastOpened + DoorCloseDelay)
 		{
 			RotateDoorYaw(DeltaTime, CurrentYaw, TargetYaw - OffsetYaw, RotationCloseSpeed);

@@ -26,37 +26,59 @@ void UGrabber::BeginPlay()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	FVector PlayerViewPointLocation;
+	FRotator PlayerViewPointRotation;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT PlayerViewPointLocation, OUT PlayerViewPointRotation);
+
+	FVector RayCastEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
+
+	if (PhysicsHandle->GetGrabbedComponent())
+	{
+		PhysicsHandle->SetTargetLocation(RayCastEnd);
+	}
 }
+
 
 void UGrabber::Grab()
 {
 	UE_LOG(LogTemp, Display, TEXT("Grab pressed"));
 
 	FHitResult HitResult = GetFirstPhysicsBodyInReach();
-	
+
 	if (HitResult.GetActor())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Interacted with actor: %s"), *HitResult.GetActor()->GetName());
+
+		PhysicsHandle->GrabComponentAtLocation(
+			HitResult.GetComponent(),
+			NAME_None,
+			HitResult.GetActor()->GetActorLocation()
+		);
 	}
 }
+
 
 void UGrabber::Release()
 {
 	UE_LOG(LogTemp, Display, TEXT("Grab released"));
+
+	if (PhysicsHandle->GetGrabbedComponent())
+	{
+		PhysicsHandle->ReleaseComponent();
+	}
 }
+
 
 void UGrabber::FindPhysicshandle()
 {
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle)
-	{
-		UE_LOG(LogTemp, Display, TEXT("%s contains PhysicsHandle."), *GetOwner()->GetName());
-	}
-	else
+	if (PhysicsHandle == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s doesn't contain PhysicsHandle Component. Please add it."), *GetOwner()->GetName());
 	}
 }
+
 
 void UGrabber::SetupInputComponent()
 {
@@ -71,6 +93,7 @@ void UGrabber::SetupInputComponent()
 		UE_LOG(LogTemp, Error, TEXT("%s doesn't contain InputComponent Component. Please add it."), *GetOwner()->GetName());
 	}
 }
+
 
 FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
 {

@@ -33,7 +33,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 	FVector RayCastEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
 
-	if (PhysicsHandle->GetGrabbedComponent())
+	if (PhysicsHandle && PhysicsHandle->GetGrabbedComponent())
 	{
 		PhysicsHandle->SetTargetLocation(RayCastEnd);
 	}
@@ -46,7 +46,7 @@ void UGrabber::Grab()
 
 	FHitResult HitResult = GetFirstPhysicsBodyInReach();
 
-	if (HitResult.GetActor())
+	if (HitResult.GetActor() && PhysicsHandle)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Interacted with actor: %s"), *HitResult.GetActor()->GetName());
 
@@ -63,7 +63,7 @@ void UGrabber::Release()
 {
 	UE_LOG(LogTemp, Display, TEXT("Grab released"));
 
-	if (PhysicsHandle->GetGrabbedComponent())
+	if (PhysicsHandle && PhysicsHandle->GetGrabbedComponent())
 	{
 		PhysicsHandle->ReleaseComponent();
 	}
@@ -73,7 +73,7 @@ void UGrabber::Release()
 void UGrabber::FindPhysicshandle()
 {
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle == nullptr)
+	if (!PhysicsHandle)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s doesn't contain PhysicsHandle Component. Please add it."), *GetOwner()->GetName());
 	}

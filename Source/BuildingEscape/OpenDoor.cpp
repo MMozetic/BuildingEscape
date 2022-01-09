@@ -2,6 +2,7 @@
 
 
 #include "OpenDoor.h"
+#include "Components/AudioComponent.h"
 
 // Sets default values for this component's properties
 UOpenDoor::UOpenDoor()
@@ -25,7 +26,8 @@ void UOpenDoor::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s has the OpenDoor component on it, but no PressurePlate set."), *GetOwner()->GetName());
 	}
-	ActorThatCanOpenDoor = GetWorld()->GetFirstPlayerController()->GetPawn();
+
+	FindAudioComponent();
 }
 
 
@@ -34,11 +36,15 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (PressurePlate && PressurePlate->IsOverlappingActor(ActorThatCanOpenDoor))
+	if (TotalMassOfActors() > RequiredMassToOpenDoors)
 	{
 		// Open Door -> Rotate from Current Yaw to Target Yaw.
 		RotateDoorYaw(DeltaTime, CurrentYaw, TargetYaw, RotationOpenSpeed);
 		DoorLastOpened = GetWorld()->GetTimeSeconds();
+		if (!IsDoorSoundPlaying && AudioComponent) {
+			IsDoorSoundPlaying = true;
+			AudioComponent->Play();
+		}
 	}
 	else
 	{
@@ -46,6 +52,12 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 		if (GetWorld()->GetTimeSeconds() > DoorLastOpened + DoorCloseDelay)
 		{
 			RotateDoorYaw(DeltaTime, CurrentYaw, TargetYaw - OpenAngle, RotationCloseSpeed);
+		}
+
+		if (IsDoorSoundPlaying)
+		{
+			IsDoorSoundPlaying = false;
+			AudioComponent->Play();
 		}
 	}
 
@@ -58,4 +70,36 @@ void UOpenDoor::RotateDoorYaw(float DeltaTime, float &StartingYaw, float EndingY
 
 	DoorRotation.Yaw = StartingYaw;
 	GetOwner()->SetActorRotation(DoorRotation);
+}
+
+float UOpenDoor::TotalMassOfActors() const
+{
+	float TotalMass = 0.f;
+
+	TArray<AActor*> OverlappingActors;
+
+	if (!PressurePlate)
+	{
+		return TotalMass;
+	}
+
+	PressurePlate->GetOverlappingActors(OverlappingActors);
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		TotalMass += Actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
+	}
+
+	return TotalMass;
+}
+
+
+void UOpenDoor::FindAudioComponent()
+{
+	AudioComponent = GetOwner()->FindComponentByClass<UAudioComponent>();
+
+	if (!AudioComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s doesn't contain audio component."), *GetOwner()->GetName());
+	}
 }
